@@ -9,13 +9,13 @@ pub enum SelectedTab {
 }
 
 impl SelectedTab {
-    pub(super) fn next(self) -> Self {
+    pub fn next(self) -> Self {
         let current_idx: usize = self as usize;
         let next_idx: usize = current_idx.saturating_add(1);
         Self::from_repr(next_idx).unwrap_or(self)
     }
 
-    pub(super) fn prev(self) -> Self {
+    pub fn prev(self) -> Self {
         let current_idx: usize = self as usize;
         let prev_idx: usize = current_idx.saturating_sub(1);
         Self::from_repr(prev_idx).unwrap_or(self)
