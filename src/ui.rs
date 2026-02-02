@@ -27,11 +27,9 @@ pub fn ui(f: &mut Frame, app: &App) {
 }
 
 fn render_tab_live(f: &mut Frame, app: &App) {
-    let conns = app.connections.lock().unwrap().clone();
-
     let mut list_items: Vec<Line<'_>> = Vec::new();
 
-    for conn in &conns {
+    for conn in app.connections.lock().unwrap().iter() {
         let color = conn
             .log()
             .front()
