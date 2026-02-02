@@ -1,14 +1,10 @@
 use self::{
     cli::generate_matches, connection::Connection, output_fmt::OutputFmt, selected_tab::SelectedTab,
 };
-use serde::Deserialize;
-use std::{
-    io::Read,
-    path::PathBuf,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 pub mod cli;
+mod config;
 pub mod connection;
 pub mod output_fmt;
 pub mod selected_tab;
@@ -22,16 +18,11 @@ pub struct App {
     is_closing: bool,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-struct ConfigFile {
-    connection: Vec<Connection>,
-}
-
 impl App {
     pub fn generate() -> Self {
         let matches: clap::ArgMatches = generate_matches();
 
-        let conns = Self::read_config();
+        let conns = config::read_config();
 
         let output_fmt = match matches.get_one::<OutputFmt>("output_fmt") {
             Some(&fmt) => fmt,
@@ -43,23 +34,6 @@ impl App {
             output_fmt,
             ..Default::default()
         }
-    }
-
-    fn read_config() -> Vec<Connection> {
-        let home = std::env::var("HOME").unwrap();
-
-        // Full path to the toml config file.
-        let toml_path = PathBuf::from(format!("{home}/.config/lanturn/config.toml"));
-
-        let mut f = std::fs::File::open(&toml_path).unwrap();
-
-        let mut buf = String::new();
-        f.read_to_string(&mut buf)
-            .expect("Failed to read contents of TOML config file.");
-
-        let c: ConfigFile = toml::from_str(&buf).unwrap();
-
-        c.connection
     }
 
     pub fn next_tab(&mut self) {

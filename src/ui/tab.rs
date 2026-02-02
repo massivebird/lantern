@@ -1,32 +1,13 @@
-use crate::app::{
-    App, connection::ConnectionType, output_fmt::OutputFmt, selected_tab::SelectedTab,
-};
+use crate::app::{App, connection::ConnectionType, output_fmt::OutputFmt};
 use ratatui::{
     Frame,
     layout::Rect,
     style::{Color, Modifier, Style, Stylize},
     text::{Line, Span},
-    widgets::{Block, List, Paragraph, Tabs},
+    widgets::{Block, List, Paragraph},
 };
-use strum::IntoEnumIterator;
 
-pub fn ui(f: &mut Frame, app: &App) {
-    // Render tabs at the top.
-
-    let titles = SelectedTab::iter().map(SelectedTab::title);
-
-    let tabs = Tabs::new(titles).select(app.selected_tab as usize);
-
-    f.render_widget(tabs, Rect::new(0, 0, f.area().width, f.area().height));
-
-    // Render contents of selected tab.
-    match app.selected_tab {
-        SelectedTab::Live => render_tab_live(f, app),
-        SelectedTab::Log => render_tab_log(f, app),
-    }
-}
-
-fn render_tab_live(f: &mut Frame, app: &App) {
+pub fn render_tab_live(f: &mut Frame, app: &App) {
     let mut list_items: Vec<Line<'_>> = Vec::new();
 
     for conn in app.connections.lock().unwrap().iter() {
@@ -39,7 +20,7 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 
         let conn_output: Line<'_> = match app.output_fmt {
             OutputFmt::Bullet => Line::from(vec![
-                Span::from(" ■ ").style(color),
+                Span::from(" 󰝤 ").style(color),
                 Span::from(format!("{} ({})", conn.name, url)),
             ]),
             OutputFmt::Line => Line::from(Span::from(format!(" {} ({})", conn.name, url))).style(
@@ -66,7 +47,7 @@ fn render_tab_live(f: &mut Frame, app: &App) {
     );
 }
 
-fn render_tab_log(f: &mut Frame, app: &App) {
+pub fn render_tab_log(f: &mut Frame, app: &App) {
     let (idx, conn) = app.log_conn();
 
     let block =
@@ -115,7 +96,7 @@ const fn status_to_color(status: Result<u16, ()>, conn_type: &ConnectionType) ->
     };
 
     match conn_type {
-        ConnectionType::Web { .. } => match code {
+        ConnectionType::Remote { .. } => match code {
             200 => Color::Green,
             _ => Color::Yellow,
         },

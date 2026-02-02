@@ -38,9 +38,10 @@ fn main() -> io::Result<()> {
     // Create app and run it.
     let ui_refresh_rate = Duration::from_millis(200);
 
-    let res = commence_application(&mut terminal, ui_refresh_rate, &mut app);
+    let res = start_app(&mut terminal, ui_refresh_rate, &mut app);
 
-    // Restore terminal.
+    // App is quitting!
+    // Restore terminal and environment to normal.
     disable_raw_mode()?;
     execute!(
         terminal.backend_mut(),
@@ -56,7 +57,7 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-fn commence_application<B: Backend>(
+fn start_app<B: Backend>(
     terminal: &mut Terminal<B>,
     ui_refresh_rate: Duration,
     app: &mut App,
@@ -100,6 +101,7 @@ fn commence_application<B: Backend>(
     }
 }
 
+/// Handles user input.
 fn handle_events(app: &mut App) -> io::Result<()> {
     if let Event::Key(key) = event::read()? {
         match key.code {
@@ -123,7 +125,7 @@ fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
     let conn_type = conns.lock().unwrap().get(idx).unwrap().conn_type.clone();
 
     let code = match conn_type {
-        ConnectionType::Web { url } => {
+        ConnectionType::Remote { url } => {
             let client = reqwest::blocking::Client::new()
                 .get(url)
                 .timeout(Duration::from_secs(3));
@@ -145,5 +147,5 @@ fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
         .unwrap()
         .get_mut(idx)
         .unwrap()
-        .push_status_code(code);
+        .push_status(code);
 }

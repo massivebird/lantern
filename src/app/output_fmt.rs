@@ -1,5 +1,4 @@
-use clap::builder::PossibleValue;
-use clap::ValueEnum;
+use clap::{ValueEnum, builder::PossibleValue};
 
 #[derive(Default, Copy, Clone)]
 pub enum OutputFmt {
@@ -8,6 +7,7 @@ pub enum OutputFmt {
     Bullet,
 }
 
+// Define CLI controls.
 impl ValueEnum for OutputFmt {
     fn value_variants<'a>() -> &'a [Self] {
         &[Self::Bullet, Self::Line]
