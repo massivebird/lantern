@@ -1,10 +1,8 @@
-use serde::Deserialize;
-
 use self::{
     cli::generate_matches, connection::Connection, output_fmt::OutputFmt, selected_tab::SelectedTab,
 };
+use serde::Deserialize;
 use std::{
-    collections::BTreeMap,
     io::Read,
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -26,7 +24,7 @@ pub struct App {
 
 #[derive(Clone, Debug, Deserialize)]
 struct ConfigFile {
-    conn: BTreeMap<String, Connection>,
+    connection: Vec<Connection>,
 }
 
 impl App {
@@ -61,7 +59,7 @@ impl App {
 
         let c: ConfigFile = toml::from_str(&buf).unwrap();
 
-        c.conn.into_values().collect()
+        c.connection
     }
 
     pub fn next_tab(&mut self) {
