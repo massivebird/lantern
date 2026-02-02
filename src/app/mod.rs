@@ -50,6 +50,7 @@ impl App {
         self.selected_tab = self.selected_tab.prev();
     }
 
+    /// Returns the connection currently selected in the Log tab.
     pub fn log_conn(&self) -> (usize, Connection) {
         (
             self.log_conn_idx,

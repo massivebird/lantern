@@ -4,9 +4,7 @@ use strum::{Display, EnumIter, FromRepr};
 #[derive(Default, Copy, Clone, Display, FromRepr, EnumIter, PartialEq, Eq)]
 pub enum SelectedTab {
     #[default]
-    #[strum(to_string = "Live")]
     Live,
-    #[strum(to_string = "Chart")]
     Log,
 }
 
