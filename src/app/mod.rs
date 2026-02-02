@@ -1,11 +1,14 @@
+use serde::Deserialize;
+
 use self::{
     cli::generate_matches, connection::Connection, output_fmt::OutputFmt, selected_tab::SelectedTab,
 };
 use std::{
-    path::Path,
+    collections::BTreeMap,
+    io::Read,
+    path::PathBuf,
     sync::{Arc, Mutex},
 };
-use yaml_rust2::Yaml;
 
 pub mod cli;
 pub mod connection;
@@ -19,6 +22,11 @@ pub struct App {
     pub selected_tab: SelectedTab,
     log_conn_idx: usize,
     is_closing: bool,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+struct ConfigFile {
+    conn: BTreeMap<String, Connection>,
 }
 
 impl App {
@@ -40,50 +48,20 @@ impl App {
     }
 
     fn read_config() -> Vec<Connection> {
-        let home_dir = std::env::var("HOME").unwrap();
-        let config_path = format!("{home_dir}/.config/lanturn/config.yaml");
+        let home = std::env::var("HOME").unwrap();
 
-        assert!(
-            Path::new(&config_path).exists(),
-            "Unable to locate config file at {config_path}",
-        );
+        // Full path to the toml config file.
+        let toml_path = PathBuf::from(format!("{home}/.config/lanturn/config.toml"));
 
-        let Ok(config_contents) = std::fs::read_to_string(config_path.clone()) else {
-            panic!("Unable to read config file at {config_path}");
-        };
+        let mut f = std::fs::File::open(&toml_path).unwrap();
 
-        let Ok(yaml) = yaml_rust2::YamlLoader::load_from_str(&config_contents) else {
-            panic!("Failed to parse config file at {config_path} into yaml.")
-        };
+        let mut buf = String::new();
+        f.read_to_string(&mut buf)
+            .expect("Failed to read contents of TOML config file.");
 
-        let sites_yaml: &Yaml = &yaml[0]["sites"];
+        let c: ConfigFile = toml::from_str(&buf).unwrap();
 
-        let mut sites: Vec<Connection> = Vec::new();
-
-        // I don't know how to iterate over yaml::as_hash() without
-        // unwrapping it, and that panics when unwrapping zero users.
-        // So if there are no users, we exit this block.
-        if sites_yaml.as_hash().is_none() {
-            unimplemented!();
-        }
-
-        for (label, properties) in sites_yaml.as_hash().unwrap() {
-            let Some(label) = label.as_str() else {
-                panic!("Failed to process label: {label:?}");
-            };
-
-            let Some(name) = properties["name"].as_str() else {
-                panic!("Failed to process field `name` for user labeled `{label}`");
-            };
-
-            let Some(url) = properties["url"].as_str() else {
-                panic!("Failed to process field `url` for user labeled `{label}`");
-            };
-
-            sites.push(Connection::new(name, url));
-        }
-
-        sites
+        c.conn.into_values().collect()
     }
 
     pub fn next_tab(&mut self) {
