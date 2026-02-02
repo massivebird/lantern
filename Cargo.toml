@@ -14,3 +14,4 @@ simplelog = "0.12.2"
 strum = "0.26.3"
 toml = "0.9.11"
 serde = { version = "1.0.228", features = ["derive"] }
+ping = "0.7.1-beta.1"

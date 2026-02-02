@@ -1,5 +1,9 @@
 use self::{
-    app::{App, connection::Connection, selected_tab::SelectedTab},
+    app::{
+        App,
+        connection::{Connection, ConnectionType},
+        selected_tab::SelectedTab,
+    },
     ui::ui,
 };
 use crossterm::{
@@ -116,19 +120,30 @@ fn handle_events(app: &mut App) -> io::Result<()> {
 }
 
 fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
-    let client = reqwest::blocking::Client::new()
-        .get(conns.lock().unwrap().get(idx).unwrap().addr())
-        .timeout(Duration::from_secs(3));
+    let conn_type = conns.lock().unwrap().get(idx).unwrap().conn_type.clone();
 
-    let status_code = client.send().map_or_else(
-        |_| Some(Err(())),
-        |response| Some(Ok(response.status().as_u16())),
-    );
+    let code = match conn_type {
+        ConnectionType::Web { url } => {
+            let client = reqwest::blocking::Client::new()
+                .get(url)
+                .timeout(Duration::from_secs(3));
+
+            client
+                .send()
+                .map_or_else(|_| Err(()), |response| Ok(response.status().as_u16()))
+        }
+        ConnectionType::Local { ip } => {
+            match ping::new(ip).timeout(Duration::from_secs(1)).send() {
+                Ok(ping_res) => Ok(ping_res.ident),
+                Err(_) => Err(()),
+            }
+        }
+    };
 
     conns
         .lock()
         .unwrap()
         .get_mut(idx)
         .unwrap()
-        .push_status_code(status_code.unwrap());
+        .push_status_code(code);
 }

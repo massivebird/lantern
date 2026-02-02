@@ -4,7 +4,7 @@ use crate::app::{
 use ratatui::{
     Frame,
     layout::Rect,
-    style::{Color, Modifier, Style},
+    style::{Color, Modifier, Style, Stylize},
     text::{Line, Span},
     widgets::{Block, List, Paragraph, Tabs},
 };
@@ -88,18 +88,21 @@ fn render_tab_log(f: &mut Frame, app: &App) {
 
     let mut text = Vec::new();
 
-    for status in conn.log() {
+    for (i, status) in conn.log().iter().enumerate() {
         let (color, desc) = match status {
-            Ok(code) if code == 200 => (Color::Green, code.to_string()),
+            Ok(code) if *code == 200 => (Color::Green, code.to_string()),
             Ok(code) => (Color::Yellow, code.to_string()),
             Err(()) => (Color::Red, "Something went wrong".to_string()),
         };
 
-        text.push(Line::from(vec![
-            Span::styled("    ", Style::new().bg(color)),
-            Span::raw(" "),
-            Span::raw(desc),
-        ]));
+        // Identify the latest status.
+        let left = if i == 0 {
+            Span::styled("  NOW  ", Style::new().bg(color).fg(Color::Black).bold())
+        } else {
+            Span::styled("       ", Style::new().bg(color))
+        };
+
+        text.push(Line::from(vec![left, Span::raw(" "), Span::raw(desc)]));
     }
 
     let paragraph = Paragraph::new(text).block(block);
