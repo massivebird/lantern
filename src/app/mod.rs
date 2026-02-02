@@ -13,8 +13,14 @@ pub mod selected_tab;
 pub struct App {
     pub connections: Arc<Mutex<Vec<Connection>>>,
     pub output_fmt: OutputFmt,
+
+    /// The index of the connection displayed in the Log tab.
     pub selected_tab: SelectedTab,
+
+    /// The index of the connection displayed in the Log tab.
     log_conn_idx: usize,
+
+    /// Indicates if the user has begun quitting the app.
     is_closing: bool,
 }
 
@@ -56,11 +62,8 @@ impl App {
         )
     }
 
-    pub const fn cycle_output_fmt(&mut self) {
-        self.output_fmt = match self.output_fmt {
-            OutputFmt::Line => OutputFmt::Bullet,
-            OutputFmt::Bullet => OutputFmt::Line,
-        };
+    pub fn cycle_output_fmt(&mut self) {
+        self.output_fmt = self.output_fmt.next();
     }
 
     pub fn next_log_conn(&mut self) {
