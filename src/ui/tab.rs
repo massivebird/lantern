@@ -39,7 +39,7 @@ pub fn render_tab_live(f: &mut Frame, app: &App) {
         list_items.push(conn_output);
     }
 
-    let block = Block::bordered().title_bottom(" q: Quit ");
+    let block = Block::bordered().title_bottom(" q: Quit | o: Cycle formats ");
 
     f.render_widget(
         List::new(list_items).block(block),

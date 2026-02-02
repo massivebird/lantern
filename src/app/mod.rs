@@ -56,6 +56,13 @@ impl App {
         )
     }
 
+    pub fn cycle_output_fmt(&mut self) {
+        self.output_fmt = match self.output_fmt {
+            OutputFmt::Line => OutputFmt::Bullet,
+            OutputFmt::Bullet => OutputFmt::Line,
+        };
+    }
+
     pub fn next_log_conn(&mut self) {
         if self.log_conn_idx != self.connections.lock().unwrap().len() - 1 {
             self.log_conn_idx += 1;
