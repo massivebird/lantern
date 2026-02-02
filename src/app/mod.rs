@@ -56,7 +56,7 @@ impl App {
         )
     }
 
-    pub fn cycle_output_fmt(&mut self) {
+    pub const fn cycle_output_fmt(&mut self) {
         self.output_fmt = match self.output_fmt {
             OutputFmt::Line => OutputFmt::Bullet,
             OutputFmt::Bullet => OutputFmt::Line,
