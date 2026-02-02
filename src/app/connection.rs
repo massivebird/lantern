@@ -53,14 +53,14 @@ impl Connection {
         self.log.push_front(code);
     }
 
-    pub fn log(&self) -> VecDeque<Result<u16, ()>> {
-        self.log.clone()
+    pub const fn log(&self) -> &VecDeque<Result<u16, ()>> {
+        &self.log
     }
 
-    pub fn addr(&self) -> String {
+    pub fn addr(&self) -> Cow<'_, str> {
         match &self.conn_type {
-            ConnectionType::Web { url } => url.clone(),
-            ConnectionType::Local { ip } => ip.to_string(),
+            ConnectionType::Web { url } => Cow::Borrowed(url),
+            ConnectionType::Local { ip } => Cow::Owned(ip.to_string()),
         }
     }
 }

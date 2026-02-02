@@ -32,41 +32,29 @@ fn render_tab_live(f: &mut Frame, app: &App) {
     let mut list_items: Vec<Line<'_>> = Vec::new();
 
     for conn in &conns {
-        // Compute online status color.
-        // Green is OK, red is bad, etc.
-        let status_color = {
-            if conn.log().front().is_none() {
-                Color::Gray // Requests have not been sent yet.
-            } else {
-                match conn.log()[0].as_ref() {
-                    Ok(code) => match code {
-                        200 => Color::Green,
-                        _ => Color::Yellow,
-                    },
-                    _ => Color::Red,
-                }
-            }
-        };
+        let color = conn
+            .log()
+            .front()
+            .map_or(Color::Gray, |f| status_to_color(*f, &conn.conn_type));
 
         let url = conn.addr();
 
         let conn_output: Line<'_> = match app.output_fmt {
             OutputFmt::Bullet => Line::from(vec![
-                Span::from(" ■ ").style(status_color),
-                Span::from(format!("{} ({})", conn.name.clone(), url)),
+                Span::from(" ■ ").style(color),
+                Span::from(format!("{} ({})", conn.name, url)),
             ]),
-            OutputFmt::Line => Line::from(Span::from(format!(" {} ({})", conn.name.clone(), url)))
-                .style(
-                    Style::new()
-                        .bg(status_color)
-                        .fg(if status_color == Color::DarkGray {
-                            Color::DarkGray
-                        } else {
-                            Color::Black
-                        })
-                        .add_modifier(Modifier::BOLD)
-                        .add_modifier(Modifier::ITALIC),
-                ),
+            OutputFmt::Line => Line::from(Span::from(format!(" {} ({})", conn.name, url))).style(
+                Style::new()
+                    .bg(color)
+                    .fg(if color == Color::DarkGray {
+                        Color::DarkGray
+                    } else {
+                        Color::Black
+                    })
+                    .add_modifier(Modifier::BOLD)
+                    .add_modifier(Modifier::ITALIC),
+            ),
         };
 
         list_items.push(conn_output);
@@ -89,11 +77,16 @@ fn render_tab_log(f: &mut Frame, app: &App) {
     let mut text = Vec::new();
 
     for (i, status) in conn.log().iter().enumerate() {
-        let (color, desc) = match status {
-            Ok(code) if *code == 200 => (Color::Green, code.to_string()),
-            Ok(code) => (Color::Yellow, code.to_string()),
-            Err(()) => (Color::Red, "Something went wrong".to_string()),
+        let desc = match status {
+            Ok(code) if *code == 200 => code.to_string(),
+            Ok(code) => code.to_string(),
+            Err(()) => "Something went wrong".to_string(),
         };
+
+        let color = conn
+            .log()
+            .front()
+            .map_or(Color::Gray, |f| status_to_color(*f, &conn.conn_type));
 
         // Identify the latest status.
         let left = if i == 0 {
@@ -119,4 +112,18 @@ fn render_tab_log(f: &mut Frame, app: &App) {
     );
 
     f.render_widget(info, Rect::new(2, 1, f.area().width, f.area().height - 1));
+}
+
+const fn status_to_color(status: Result<u16, ()>, conn_type: &ConnectionType) -> Color {
+    let Ok(code) = status else {
+        return Color::Red;
+    };
+
+    match conn_type {
+        ConnectionType::Web { .. } => match code {
+            200 => Color::Green,
+            _ => Color::Yellow,
+        },
+        ConnectionType::Local { .. } => Color::Green,
+    }
 }
