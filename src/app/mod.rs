@@ -1,4 +1,6 @@
-use self::{cli::generate_matches, output_fmt::OutputFmt, selected_tab::SelectedTab, connection::Connection};
+use self::{
+    cli::generate_matches, connection::Connection, output_fmt::OutputFmt, selected_tab::SelectedTab,
+};
 use std::{
     path::Path,
     sync::{Arc, Mutex},
@@ -6,9 +8,9 @@ use std::{
 use yaml_rust2::Yaml;
 
 pub mod cli;
+pub mod connection;
 pub mod output_fmt;
 pub mod selected_tab;
-pub mod connection;
 
 #[derive(Default)]
 pub struct App {
@@ -63,7 +65,7 @@ impl App {
         // So if there are no users, we exit this block.
         if sites_yaml.as_hash().is_none() {
             unimplemented!();
-        };
+        }
 
         for (label, properties) in sites_yaml.as_hash().unwrap() {
             let Some(label) = label.as_str() else {
@@ -92,8 +94,16 @@ impl App {
         self.selected_tab = self.selected_tab.prev();
     }
 
-    pub const fn get_selected_chart_site_idx(&self) -> usize {
-        self.chart_site_idx
+    pub fn chart_site(&self) -> (usize, Connection) {
+        (
+            self.chart_site_idx,
+            self.connections
+                .lock()
+                .unwrap()
+                .get(self.chart_site_idx)
+                .unwrap()
+                .clone(),
+        )
     }
 
     pub fn next_chart_site(&mut self) {
@@ -102,11 +112,11 @@ impl App {
         }
     }
 
-    pub fn prev_chart_site(&mut self) {
+    pub const fn prev_chart_site(&mut self) {
         self.chart_site_idx = self.chart_site_idx.saturating_sub(1);
     }
 
-    pub fn close(&mut self) {
+    pub const fn close(&mut self) {
         self.is_closing = true;
     }
 

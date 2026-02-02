@@ -79,18 +79,24 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 }
 
 fn render_tab_log(f: &mut Frame, app: &App) {
-    let idx = app.get_selected_chart_site_idx();
-
-    let site = app.connections.lock().unwrap().get(idx).unwrap().clone();
-
-    let statuses = site.log();
+    let (idx, site) = app.chart_site();
 
     let block = Block::bordered().title_bottom(" q: Quit | j: Next site | k: Previous site ");
 
     let mut text = Vec::new();
 
     for status in site.log() {
-        text.push(Line::raw(format!("{status:?}")));
+        let (color, desc) = match status {
+            Ok(code) if code == 200 => (Color::Green, code.to_string()),
+            Ok(code) => (Color::Yellow, code.to_string()),
+            Err(()) => (Color::Red, "Something went wrong".to_string()),
+        };
+
+        text.push(Line::from(vec![
+            Span::styled("    ", Style::new().bg(color)),
+            Span::raw(" "),
+            Span::raw(desc),
+        ]));
     }
 
     let paragraph = Paragraph::new(text).block(block);

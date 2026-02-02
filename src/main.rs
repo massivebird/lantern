@@ -99,7 +99,7 @@ fn commence_application<B: Backend>(
 fn handle_events(app: &mut App) -> io::Result<()> {
     if let Event::Key(key) = event::read()? {
         match key.code {
-            KeyCode::Char('q') => app.close(),
+            KeyCode::Char('q' | 'Q') => app.close(),
             KeyCode::Char('l') => app.next_tab(),
             KeyCode::Char('h') => app.prev_tab(),
             KeyCode::Char('j') if app.selected_tab == SelectedTab::Log => {
