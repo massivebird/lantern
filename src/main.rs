@@ -1,5 +1,5 @@
 use self::{
-    app::{App, selected_tab::SelectedTab, connection::Connection},
+    app::{App, connection::Connection, selected_tab::SelectedTab},
     ui::ui,
 };
 use crossterm::{
@@ -57,7 +57,7 @@ fn commence_application<B: Backend>(
     ui_refresh_rate: Duration,
     app: &mut App,
 ) -> io::Result<()> {
-    let sites = Arc::clone(&app.sites);
+    let sites = Arc::clone(&app.connections);
 
     thread::spawn(move || {
         loop {
@@ -102,10 +102,10 @@ fn handle_events(app: &mut App) -> io::Result<()> {
             KeyCode::Char('q') => app.close(),
             KeyCode::Char('l') => app.next_tab(),
             KeyCode::Char('h') => app.prev_tab(),
-            KeyCode::Char('j') if app.selected_tab == SelectedTab::Chart => {
+            KeyCode::Char('j') if app.selected_tab == SelectedTab::Log => {
                 app.next_chart_site();
             }
-            KeyCode::Char('k') if app.selected_tab == SelectedTab::Chart => {
+            KeyCode::Char('k') if app.selected_tab == SelectedTab::Log => {
                 app.prev_chart_site();
             }
             _ => (),
@@ -130,5 +130,5 @@ fn fetch_site(sites: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
         .unwrap()
         .get_mut(idx)
         .unwrap()
-        .push_status_code(status_code);
+        .push_status_code(status_code.unwrap());
 }

@@ -12,10 +12,10 @@ pub mod connection;
 
 #[derive(Default)]
 pub struct App {
-    pub sites: Arc<Mutex<Vec<Connection>>>,
+    pub connections: Arc<Mutex<Vec<Connection>>>,
     pub output_fmt: OutputFmt,
     pub selected_tab: SelectedTab,
-    selected_chart_site_idx: usize,
+    chart_site_idx: usize,
     is_closing: bool,
 }
 
@@ -31,7 +31,7 @@ impl App {
         };
 
         Self {
-            sites: Arc::new(Mutex::new(sites)),
+            connections: Arc::new(Mutex::new(sites)),
             output_fmt,
             ..Default::default()
         }
@@ -93,17 +93,17 @@ impl App {
     }
 
     pub const fn get_selected_chart_site_idx(&self) -> usize {
-        self.selected_chart_site_idx
+        self.chart_site_idx
     }
 
     pub fn next_chart_site(&mut self) {
-        if self.selected_chart_site_idx != self.sites.lock().unwrap().len() - 1 {
-            self.selected_chart_site_idx += 1;
+        if self.chart_site_idx != self.connections.lock().unwrap().len() - 1 {
+            self.chart_site_idx += 1;
         }
     }
 
     pub fn prev_chart_site(&mut self) {
-        self.selected_chart_site_idx = self.selected_chart_site_idx.saturating_sub(1);
+        self.chart_site_idx = self.chart_site_idx.saturating_sub(1);
     }
 
     pub fn close(&mut self) {

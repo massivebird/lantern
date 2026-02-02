@@ -6,7 +6,7 @@ pub const MAX_STATUSES: usize = 50;
 pub struct Connection {
     pub name: String,
     pub conn_type: ConnectionType,
-    status_codes: VecDeque<Option<Result<u16, ()>>>,
+    log: VecDeque<Result<u16, ()>>,
 }
 
 #[derive(Clone, Debug)]
@@ -19,23 +19,23 @@ impl Connection {
     pub(super) fn new(name: &str, addr: &str) -> Self {
         Self {
             name: name.to_string(),
-            status_codes: vec![None; MAX_STATUSES].into(),
+            log: VecDeque::with_capacity(MAX_STATUSES),
             conn_type: ConnectionType::Web {
                 url: addr.to_string(),
             },
         }
     }
 
-    pub fn push_status_code(&mut self, code: Option<Result<u16, ()>>) {
-        if self.status_codes.len() == MAX_STATUSES {
-            self.status_codes.pop_back();
+    pub fn push_status_code(&mut self, code: Result<u16, ()>) {
+        if self.log.len() == MAX_STATUSES {
+            self.log.pop_back();
         }
 
-        self.status_codes.push_front(code);
+        self.log.push_front(code);
     }
 
-    pub fn get_status_codes(&self) -> VecDeque<Option<Result<u16, ()>>> {
-        self.status_codes.clone()
+    pub fn log(&self) -> VecDeque<Result<u16, ()>> {
+        self.log.clone()
     }
 
     pub fn addr(&self) -> String {

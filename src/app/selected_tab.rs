@@ -7,7 +7,7 @@ pub enum SelectedTab {
     #[strum(to_string = "Live")]
     Live,
     #[strum(to_string = "Chart")]
-    Chart,
+    Log,
 }
 
 impl SelectedTab {
