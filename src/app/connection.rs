@@ -17,12 +17,17 @@ pub enum ConnectionType {
 
 impl Connection {
     pub(super) fn new(name: &str, addr: &str) -> Self {
+        let conn_type = addr.parse().map_or_else(
+            |_| ConnectionType::Web {
+                url: addr.to_string(),
+            },
+            |ip| ConnectionType::Local { ip },
+        );
+
         Self {
             name: name.to_string(),
             log: VecDeque::with_capacity(MAX_STATUSES),
-            conn_type: ConnectionType::Web {
-                url: addr.to_string(),
-            },
+            conn_type,
         }
     }
 

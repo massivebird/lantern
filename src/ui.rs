@@ -1,4 +1,6 @@
-use crate::app::{App, output_fmt::OutputFmt, selected_tab::SelectedTab};
+use crate::app::{
+    App, connection::ConnectionType, output_fmt::OutputFmt, selected_tab::SelectedTab,
+};
 use ratatui::{
     Frame,
     layout::Rect,
@@ -25,18 +27,18 @@ pub fn ui(f: &mut Frame, app: &App) {
 }
 
 fn render_tab_live(f: &mut Frame, app: &App) {
-    let sites = app.connections.lock().unwrap().clone();
+    let conns = app.connections.lock().unwrap().clone();
 
     let mut list_items: Vec<Line<'_>> = Vec::new();
 
-    for site in &sites {
+    for conn in &conns {
         // Compute online status color.
         // Green is OK, red is bad, etc.
         let status_color = {
-            if site.log().front().is_none() {
+            if conn.log().front().is_none() {
                 Color::Gray // Requests have not been sent yet.
             } else {
-                match site.log()[0].as_ref() {
+                match conn.log()[0].as_ref() {
                     Ok(code) => match code {
                         200 => Color::Green,
                         _ => Color::Yellow,
@@ -46,14 +48,14 @@ fn render_tab_live(f: &mut Frame, app: &App) {
             }
         };
 
-        let url = site.addr();
+        let url = conn.addr();
 
-        let site_output: Line<'_> = match app.output_fmt {
+        let conn_output: Line<'_> = match app.output_fmt {
             OutputFmt::Bullet => Line::from(vec![
                 Span::from(" ■ ").style(status_color),
-                Span::from(format!("{} ({})", site.name.clone(), url)),
+                Span::from(format!("{} ({})", conn.name.clone(), url)),
             ]),
-            OutputFmt::Line => Line::from(Span::from(format!(" {} ({})", site.name.clone(), url)))
+            OutputFmt::Line => Line::from(Span::from(format!(" {} ({})", conn.name.clone(), url)))
                 .style(
                     Style::new()
                         .bg(status_color)
@@ -67,7 +69,7 @@ fn render_tab_live(f: &mut Frame, app: &App) {
                 ),
         };
 
-        list_items.push(site_output);
+        list_items.push(conn_output);
     }
 
     let block = Block::bordered().title_bottom(" q: Quit ");
@@ -79,13 +81,14 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 }
 
 fn render_tab_log(f: &mut Frame, app: &App) {
-    let (idx, site) = app.chart_site();
+    let (idx, conn) = app.log_conn();
 
-    let block = Block::bordered().title_bottom(" q: Quit | j: Next site | k: Previous site ");
+    let block =
+        Block::bordered().title_bottom(" q: Quit | j: Next connection | k: Previous connection ");
 
     let mut text = Vec::new();
 
-    for status in site.log() {
+    for status in conn.log() {
         let (color, desc) = match status {
             Ok(code) if code == 200 => (Color::Green, code.to_string()),
             Ok(code) => (Color::Yellow, code.to_string()),
@@ -102,9 +105,9 @@ fn render_tab_log(f: &mut Frame, app: &App) {
     let paragraph = Paragraph::new(text).block(block);
 
     let info = Line::from(format!(
-        " Selected site: [{idx:02}] {} ({}) ",
-        site.name,
-        site.addr()
+        " Selected connection: [{idx:02}] {} ({}) ",
+        conn.name,
+        conn.addr()
     ));
 
     f.render_widget(

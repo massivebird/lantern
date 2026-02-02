@@ -57,17 +57,17 @@ fn commence_application<B: Backend>(
     ui_refresh_rate: Duration,
     app: &mut App,
 ) -> io::Result<()> {
-    let sites = Arc::clone(&app.connections);
+    let conns = Arc::clone(&app.connections);
 
     thread::spawn(move || {
         loop {
-            let num_sites = sites.lock().unwrap().len();
+            let num_conns = conns.lock().unwrap().len();
 
-            for idx in 0..num_sites {
-                let sites = Arc::clone(&sites);
+            for idx in 0..num_conns {
+                let conns = Arc::clone(&conns);
 
                 thread::spawn(move || {
-                    fetch_site(&sites, idx);
+                    test_conn(&conns, idx);
                 });
             }
 
@@ -103,10 +103,10 @@ fn handle_events(app: &mut App) -> io::Result<()> {
             KeyCode::Char('l') => app.next_tab(),
             KeyCode::Char('h') => app.prev_tab(),
             KeyCode::Char('j') if app.selected_tab == SelectedTab::Log => {
-                app.next_chart_site();
+                app.next_log_conn();
             }
             KeyCode::Char('k') if app.selected_tab == SelectedTab::Log => {
-                app.prev_chart_site();
+                app.prev_log_conn();
             }
             _ => (),
         }
@@ -115,9 +115,9 @@ fn handle_events(app: &mut App) -> io::Result<()> {
     Ok(())
 }
 
-fn fetch_site(sites: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
+fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
     let client = reqwest::blocking::Client::new()
-        .get(sites.lock().unwrap().get(idx).unwrap().addr())
+        .get(conns.lock().unwrap().get(idx).unwrap().addr())
         .timeout(Duration::from_secs(3));
 
     let status_code = client.send().map_or_else(
@@ -125,7 +125,7 @@ fn fetch_site(sites: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
         |response| Some(Ok(response.status().as_u16())),
     );
 
-    sites
+    conns
         .lock()
         .unwrap()
         .get_mut(idx)

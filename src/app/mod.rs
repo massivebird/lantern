@@ -17,7 +17,7 @@ pub struct App {
     pub connections: Arc<Mutex<Vec<Connection>>>,
     pub output_fmt: OutputFmt,
     pub selected_tab: SelectedTab,
-    chart_site_idx: usize,
+    log_conn_idx: usize,
     is_closing: bool,
 }
 
@@ -25,7 +25,7 @@ impl App {
     pub fn generate() -> Self {
         let matches: clap::ArgMatches = generate_matches();
 
-        let sites = Self::read_sites_from_file();
+        let conns = Self::read_config();
 
         let output_fmt = match matches.get_one::<OutputFmt>("output_fmt") {
             Some(&fmt) => fmt,
@@ -33,13 +33,13 @@ impl App {
         };
 
         Self {
-            connections: Arc::new(Mutex::new(sites)),
+            connections: Arc::new(Mutex::new(conns)),
             output_fmt,
             ..Default::default()
         }
     }
 
-    fn read_sites_from_file() -> Vec<Connection> {
+    fn read_config() -> Vec<Connection> {
         let home_dir = std::env::var("HOME").unwrap();
         let config_path = format!("{home_dir}/.config/lanturn/config.yaml");
 
@@ -94,26 +94,26 @@ impl App {
         self.selected_tab = self.selected_tab.prev();
     }
 
-    pub fn chart_site(&self) -> (usize, Connection) {
+    pub fn log_conn(&self) -> (usize, Connection) {
         (
-            self.chart_site_idx,
+            self.log_conn_idx,
             self.connections
                 .lock()
                 .unwrap()
-                .get(self.chart_site_idx)
+                .get(self.log_conn_idx)
                 .unwrap()
                 .clone(),
         )
     }
 
-    pub fn next_chart_site(&mut self) {
-        if self.chart_site_idx != self.connections.lock().unwrap().len() - 1 {
-            self.chart_site_idx += 1;
+    pub fn next_log_conn(&mut self) {
+        if self.log_conn_idx != self.connections.lock().unwrap().len() - 1 {
+            self.log_conn_idx += 1;
         }
     }
 
-    pub const fn prev_chart_site(&mut self) {
-        self.chart_site_idx = self.chart_site_idx.saturating_sub(1);
+    pub const fn prev_log_conn(&mut self) {
+        self.log_conn_idx = self.log_conn_idx.saturating_sub(1);
     }
 
     pub const fn close(&mut self) {
