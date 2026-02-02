@@ -83,10 +83,7 @@ fn render_tab_log(f: &mut Frame, app: &App) {
             Err(()) => "Something went wrong".to_string(),
         };
 
-        let color = conn
-            .log()
-            .front()
-            .map_or(Color::Gray, |f| status_to_color(*f, &conn.conn_type));
+        let color = status_to_color(*status, &conn.conn_type);
 
         // Identify the latest status.
         let left = if i == 0 {
