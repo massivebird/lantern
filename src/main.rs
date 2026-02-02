@@ -1,15 +1,15 @@
 use self::{
-    app::{selected_tab::SelectedTab, site::Site, App},
+    app::{App, selected_tab::SelectedTab, connection::Connection},
     ui::ui,
 };
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 use ratatui::{
-    backend::{Backend, CrosstermBackend},
     Terminal,
+    backend::{Backend, CrosstermBackend},
 };
 use std::{
     io,
@@ -59,18 +59,20 @@ fn commence_application<B: Backend>(
 ) -> io::Result<()> {
     let sites = Arc::clone(&app.sites);
 
-    thread::spawn(move || loop {
-        let num_sites = sites.lock().unwrap().len();
+    thread::spawn(move || {
+        loop {
+            let num_sites = sites.lock().unwrap().len();
 
-        for idx in 0..num_sites {
-            let sites = Arc::clone(&sites);
+            for idx in 0..num_sites {
+                let sites = Arc::clone(&sites);
 
-            thread::spawn(move || {
-                fetch_site(&sites, idx);
-            });
+                thread::spawn(move || {
+                    fetch_site(&sites, idx);
+                });
+            }
+
+            thread::sleep(Duration::from_secs(5));
         }
-
-        thread::sleep(Duration::from_secs(5));
     });
 
     let mut last_tick = Instant::now();
@@ -113,9 +115,9 @@ fn handle_events(app: &mut App) -> io::Result<()> {
     Ok(())
 }
 
-fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
+fn fetch_site(sites: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
     let client = reqwest::blocking::Client::new()
-        .get(sites.lock().unwrap().get(idx).unwrap().url.clone())
+        .get(sites.lock().unwrap().get(idx).unwrap().addr())
         .timeout(Duration::from_secs(3));
 
     let status_code = client.send().map_or_else(

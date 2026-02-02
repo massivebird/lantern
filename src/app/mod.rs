@@ -1,4 +1,4 @@
-use self::{cli::generate_matches, output_fmt::OutputFmt, selected_tab::SelectedTab, site::Site};
+use self::{cli::generate_matches, output_fmt::OutputFmt, selected_tab::SelectedTab, connection::Connection};
 use std::{
     path::Path,
     sync::{Arc, Mutex},
@@ -8,11 +8,11 @@ use yaml_rust2::Yaml;
 pub mod cli;
 pub mod output_fmt;
 pub mod selected_tab;
-pub mod site;
+pub mod connection;
 
 #[derive(Default)]
 pub struct App {
-    pub sites: Arc<Mutex<Vec<Site>>>,
+    pub sites: Arc<Mutex<Vec<Connection>>>,
     pub output_fmt: OutputFmt,
     pub selected_tab: SelectedTab,
     selected_chart_site_idx: usize,
@@ -37,7 +37,7 @@ impl App {
         }
     }
 
-    fn read_sites_from_file() -> Vec<Site> {
+    fn read_sites_from_file() -> Vec<Connection> {
         let home_dir = std::env::var("HOME").unwrap();
         let config_path = format!("{home_dir}/.config/lanturn/config.yaml");
 
@@ -56,7 +56,7 @@ impl App {
 
         let sites_yaml: &Yaml = &yaml[0]["sites"];
 
-        let mut sites: Vec<Site> = Vec::new();
+        let mut sites: Vec<Connection> = Vec::new();
 
         // I don't know how to iterate over yaml::as_hash() without
         // unwrapping it, and that panics when unwrapping zero users.
@@ -78,7 +78,7 @@ impl App {
                 panic!("Failed to process field `url` for user labeled `{label}`");
             };
 
-            sites.push(Site::new(name, url));
+            sites.push(Connection::new(name, url));
         }
 
         sites

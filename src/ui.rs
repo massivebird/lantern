@@ -1,10 +1,10 @@
-use crate::app::{output_fmt::OutputFmt, selected_tab::SelectedTab, site::MAX_STATUSES, App};
+use crate::app::{App, connection::MAX_STATUSES, output_fmt::OutputFmt, selected_tab::SelectedTab};
 use ratatui::{
+    Frame,
     layout::Rect,
     style::{Color, Modifier, Style, Stylize},
     text::{Line, Span},
     widgets::{Bar, BarChart, BarGroup, Block, List, Tabs},
-    Frame,
 };
 use strum::IntoEnumIterator;
 
@@ -46,13 +46,15 @@ fn render_tab_live(f: &mut Frame, app: &App) {
             }
         };
 
+        let url = site.addr();
+
         let site_output: Line<'_> = match app.output_fmt {
             OutputFmt::Bullet => Line::from(vec![
                 Span::from(" ■ ").style(status_color),
-                Span::from(format!("{} ({})", site.name.clone(), site.url)),
+                Span::from(format!("{} ({})", site.name.clone(), url)),
             ]),
-            OutputFmt::Line => {
-                Line::from(Span::from(format!(" {} ({})", site.name.clone(), site.url))).style(
+            OutputFmt::Line => Line::from(Span::from(format!(" {} ({})", site.name.clone(), url)))
+                .style(
                     Style::new()
                         .bg(status_color)
                         .fg(if status_color == Color::DarkGray {
@@ -62,8 +64,7 @@ fn render_tab_live(f: &mut Frame, app: &App) {
                         })
                         .add_modifier(Modifier::BOLD)
                         .add_modifier(Modifier::ITALIC),
-                )
-            }
+                ),
         };
 
         list_items.push(site_output);
@@ -125,7 +126,8 @@ fn render_tab_chart(f: &mut Frame, app: &App) {
 
     let info = Line::from(format!(
         " Selected site: [{idx:02}] {} ({}) ",
-        site.name, site.url
+        site.name,
+        site.addr()
     ));
 
     f.render_widget(
