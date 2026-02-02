@@ -59,18 +59,18 @@ environment.systemPackages = [
 
 ## Configuration
 
-Lanturn reads from a config file at `$HOME/.config/lanturn/config.yaml`.
+Lanturn reads the config file at `$HOME/.config/lanturn/config.toml`.
 
-Use the following as a template:
+The schema looks something like this:
 
-```yaml
-# $HOME/.config/lanturn/config.yaml
+```toml
+# $HOME/.config/lanturn/config.toml
 
-sites: # All websites go under here.
-  github:                      # A site "label." This can be whatever you want!
-    name: "GitHub"             # Human-readable site name.
-    url: "https://github.com"  # Site URL.
-  google:
-    name: "Google"
-    url: "https://google.com"
+[[connection]]
+name = "GitHub"
+addr = "https://github.com"
+
+[[connection]]
+name = "PC"
+addr = "192.168.1.159" # Local machine IP
 ```
