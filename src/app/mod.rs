@@ -22,6 +22,10 @@ pub struct App {
     /// The index of the connection displayed in the Log tab.
     log_conn_idx: usize,
 
+    /// Alternates with every wave of connection tests.
+    /// Used for displaying update progress.
+    pub updated: Arc<Mutex<bool>>,
+
     /// Indicates if the user has begun quitting the app.
     is_closing: bool,
 }

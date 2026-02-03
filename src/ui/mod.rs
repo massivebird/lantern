@@ -1,5 +1,9 @@
 use crate::app::{App, selected_tab::SelectedTab};
-use ratatui::{Frame, layout::Rect, widgets::Tabs};
+use ratatui::{
+    Frame,
+    layout::Rect,
+    widgets::{self, Block, Tabs},
+};
 use strum::IntoEnumIterator;
 
 mod tab;
@@ -15,4 +19,17 @@ pub fn ui(f: &mut Frame, app: &App) {
         SelectedTab::Live => tab::render_tab_live(f, app),
         SelectedTab::Log => tab::render_tab_log(f, app),
     }
+
+    let upd_str = if *app.updated.lock().unwrap() {
+        "█ "
+    } else {
+        " █"
+    };
+
+    let upd_block = Block::bordered();
+
+    f.render_widget(
+        widgets::Paragraph::new(upd_str).block(upd_block),
+        Rect::new(f.area().width - 6, f.area().height - 4, 4, 3),
+    );
 }
