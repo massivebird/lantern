@@ -135,14 +135,14 @@ fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
                 .timeout(Duration::from_secs(3));
 
             match client.send() {
-                Ok(response) => Ok(response.status().as_u16()),
-                Err(e) => Err(e.to_string()),
+                Ok(response) => Ok(response.status().as_u16()).into(),
+                Err(e) => Err(e.to_string()).into(),
             }
         }
         ConnectionType::Local { ip } => {
             match ping::new(ip).timeout(Duration::from_secs(1)).send() {
-                Ok(ping_res) => Ok(ping_res.rtt.subsec_millis().try_into().unwrap()),
-                Err(e) => Err(e.to_string()),
+                Ok(ping_res) => Ok(ping_res.rtt.subsec_millis().try_into().unwrap()).into(),
+                Err(e) => Err(e.to_string()).into(),
             }
         }
     };

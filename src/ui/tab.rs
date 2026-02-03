@@ -56,7 +56,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     let mut text = Vec::new();
 
     for (i, status) in conn.log().iter().enumerate() {
-        let desc = match (status, &conn.conn_type) {
+        let desc = match (status.code(), &conn.conn_type) {
             (Ok(code), ConnectionType::Remote { .. }) => code.to_string(),
             (Ok(ms), ConnectionType::Local { .. }) => format!("{ms} ms"),
             (Err(e), _) => e.clone(),
@@ -71,7 +71,15 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
             Span::styled("       ", Style::new().bg(color))
         };
 
-        text.push(Line::from(vec![left, Span::raw(" "), Span::raw(desc)]));
+        let time = status.timestamp().time();
+
+        text.push(Line::from(vec![
+            left,
+            Span::raw(" "),
+            Span::raw(format!("{desc:9}")),
+            Span::raw(" "),
+            Span::raw(time.to_string()),
+        ]));
     }
 
     let paragraph = Paragraph::new(text).block(block);
@@ -90,8 +98,8 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     f.render_widget(info, Rect::new(2, 1, f.area().width, f.area().height - 1));
 }
 
-const fn status_to_color(status: &app::Status, conn_type: &ConnectionType) -> Color {
-    let Ok(code) = status else {
+fn status_to_color(status: &app::Status, conn_type: &ConnectionType) -> Color {
+    let Ok(code) = status.code() else {
         return Color::Red;
     };
 

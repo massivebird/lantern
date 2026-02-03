@@ -2,12 +2,12 @@ use serde::{Deserialize, Deserializer};
 use std::{borrow::Cow, collections::VecDeque};
 
 mod conn_type;
+mod status;
 
 pub use conn_type::ConnectionType;
+pub use status::Status;
 
-pub type Status = Result<u16, String>;
-
-pub const MAX_STATUSES: usize = 50;
+pub const MAX_STATUSES: usize = 30;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Connection {
