@@ -11,7 +11,7 @@ pub fn read_config() -> Vec<Connection> {
     let home = std::env::var("HOME").unwrap();
 
     // Full path to the toml config file.
-    let toml_path = PathBuf::from(format!("{home}/.config/lanturn/config.toml"));
+    let toml_path = PathBuf::from(format!("{home}/.config/lantern/config.toml"));
 
     let mut f = std::fs::File::open(&toml_path).unwrap();
 

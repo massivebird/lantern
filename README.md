@@ -4,17 +4,17 @@
 
 <div align="center">
 
-  <!-- <a href="">![](https://img.shields.io/github/v/release/massivebird/lanturn)</a> -->
-  <a href="">![](https://img.shields.io/github/actions/workflow/status/massivebird/lanturn/rust.yml)</a>
+  <!-- <a href="">![](https://img.shields.io/github/v/release/massivebird/lantern)</a> -->
+  <a href="">![](https://img.shields.io/github/actions/workflow/status/massivebird/lantern/rust.yml)</a>
   <a href="">![](https://img.shields.io/badge/Built_With-Ratatui-000?logo=ratatui&logoColor=fff&labelColor=000&color=fff)</a>
 
 </div>
 
-# Lanturn
+# Lantern
 
-Lanturn is a website connectivity monitor written in Rust 🦀
+Lantern is a website connectivity monitor written in Rust 🦀
 
-Lanturn offers a simple dashboard that lets you quickly check if your internet — or one of your favorite sites — is up or down.
+Lantern offers a simple dashboard that lets you quickly check if your internet — or one of your favorite sites — is up or down.
 
 ## Building
 
@@ -23,8 +23,8 @@ To manually build the project, you must first [install Rust](https://www.rust-la
 Once you have Rust installed, run the following commands:
 
 ```bash
-git clone https://github.com/massivebird/lanturn
-cd lanturn
+git clone https://github.com/massivebird/lantern
+cd lantern
 cargo run # runs unoptimized build
 ```
 
@@ -38,8 +38,8 @@ If you're using Nix, you can add the following to your flake's `inputs`:
 inputs = {
   # ...
 
-  lanturn = {
-    url = "github:massivebird/lanturn";
+  lantern = {
+    url = "github:massivebird/lantern";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -52,19 +52,19 @@ Then, add the following to your `environment.systemPackages`:
 ```nix
 environment.systemPackages = [
   # ...
-  inputs.lanturn.packages.${pkgs.system}.default
+  inputs.lantern.packages.${pkgs.system}.default
   # ...
 ]
 ```
 
 ## Configuration
 
-Lanturn reads the config file at `$HOME/.config/lanturn/config.toml`.
+Lantern reads the config file at `$HOME/.config/lantern/config.toml`.
 
 The schema looks something like this:
 
 ```toml
-# $HOME/.config/lanturn/config.toml
+# $HOME/.config/lantern/config.toml
 
 [[connection]]
 name = "GitHub"

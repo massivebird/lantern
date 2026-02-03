@@ -1,5 +1,5 @@
 {
-  description = "Checks if your machine is freakin online bruv";
+  description = "Is it online or what";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
