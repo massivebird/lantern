@@ -21,15 +21,15 @@ pub fn ui(f: &mut Frame, app: &App) {
     }
 
     let upd_str = if *app.updated.lock().unwrap() {
-        "█ "
+        "██  "
     } else {
-        " █"
+        "  ██"
     };
 
     let upd_block = Block::bordered();
 
     f.render_widget(
         widgets::Paragraph::new(upd_str).block(upd_block),
-        Rect::new(f.area().width - 6, f.area().height - 4, 4, 3),
+        Rect::new(f.area().width - 6, f.area().height - 3, 6, 3),
     );
 }
