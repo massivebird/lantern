@@ -125,20 +125,21 @@ fn handle_events(app: &mut App) -> io::Result<()> {
 fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
     let conn_type = conns.lock().unwrap().get(idx).unwrap().conn_type.clone();
 
-    let code = match conn_type {
+    let code: app::Status = match conn_type {
         ConnectionType::Remote { url } => {
             let client = reqwest::blocking::Client::new()
                 .get(url)
                 .timeout(Duration::from_secs(3));
 
-            client
-                .send()
-                .map_or_else(|_| Err(()), |response| Ok(response.status().as_u16()))
+            match client.send() {
+                Ok(response) => Ok(response.status().as_u16()),
+                Err(e) => Err(e.to_string()),
+            }
         }
         ConnectionType::Local { ip } => {
             match ping::new(ip).timeout(Duration::from_secs(1)).send() {
-                Ok(ping_res) => Ok(ping_res.rtt.subsec_millis() as u16),
-                Err(_) => Err(()),
+                Ok(ping_res) => Ok(ping_res.rtt.subsec_millis().try_into().unwrap()),
+                Err(e) => Err(e.to_string()),
             }
         }
     };

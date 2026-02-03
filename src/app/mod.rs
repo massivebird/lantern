@@ -9,6 +9,8 @@ pub mod connection;
 pub mod output_fmt;
 pub mod selected_tab;
 
+pub use connection::Status;
+
 #[derive(Default)]
 pub struct App {
     pub connections: Arc<Mutex<Vec<Connection>>>,

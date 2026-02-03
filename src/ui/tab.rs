@@ -1,4 +1,4 @@
-use crate::app::{App, connection::ConnectionType, output_fmt::OutputFmt};
+use crate::app::{self, App, connection::ConnectionType, output_fmt::OutputFmt};
 use ratatui::{
     Frame,
     layout::Rect,
@@ -14,7 +14,7 @@ pub fn render_tab_live(f: &mut Frame, app: &App) {
         let color = conn
             .log()
             .front()
-            .map_or(Color::Gray, |f| status_to_color(*f, &conn.conn_type));
+            .map_or(Color::Gray, |f| status_to_color(f, &conn.conn_type));
 
         let url = conn.addr();
 
@@ -59,14 +59,14 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
         let desc = match (status, &conn.conn_type) {
             (Ok(code), ConnectionType::Remote { .. }) => code.to_string(),
             (Ok(ms), ConnectionType::Local { .. }) => format!("{ms} ms"),
-            (Err(()), _) => "Something went wrong".to_string(),
+            (Err(e), _) => e.clone(),
         };
 
-        let color = status_to_color(*status, &conn.conn_type);
+        let color = status_to_color(status, &conn.conn_type);
 
         // Identify the latest status.
         let left = if i == 0 {
-            Span::styled("  NOW  ", Style::new().bg(color).fg(Color::Black).bold())
+            Span::styled("  Now  ", Style::new().bg(color).fg(Color::Black).bold())
         } else {
             Span::styled("       ", Style::new().bg(color))
         };
@@ -90,7 +90,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     f.render_widget(info, Rect::new(2, 1, f.area().width, f.area().height - 1));
 }
 
-const fn status_to_color(status: Result<u16, ()>, conn_type: &ConnectionType) -> Color {
+const fn status_to_color(status: &app::Status, conn_type: &ConnectionType) -> Color {
     let Ok(code) = status else {
         return Color::Red;
     };

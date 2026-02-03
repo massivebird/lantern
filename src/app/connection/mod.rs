@@ -1,11 +1,13 @@
 use serde::{Deserialize, Deserializer};
 use std::{borrow::Cow, collections::VecDeque};
 
-pub const MAX_STATUSES: usize = 50;
-
 mod conn_type;
 
 pub use conn_type::ConnectionType;
+
+pub type Status = Result<u16, String>;
+
+pub const MAX_STATUSES: usize = 50;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Connection {
@@ -16,11 +18,11 @@ pub struct Connection {
     pub conn_type: ConnectionType,
 
     #[serde(skip)]
-    log: VecDeque<Result<u16, ()>>,
+    log: VecDeque<Status>,
 }
 
 impl Connection {
-    pub fn push_status(&mut self, code: Result<u16, ()>) {
+    pub fn push_status(&mut self, code: Status) {
         if self.log.len() == MAX_STATUSES {
             self.log.pop_back();
         }
@@ -28,7 +30,7 @@ impl Connection {
         self.log.push_front(code);
     }
 
-    pub const fn log(&self) -> &VecDeque<Result<u16, ()>> {
+    pub const fn log(&self) -> &VecDeque<Status> {
         &self.log
     }
 
