@@ -56,10 +56,10 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     let mut text = Vec::new();
 
     for (i, status) in conn.log().iter().enumerate() {
-        let desc = match status {
-            Ok(code) if *code == 200 => code.to_string(),
-            Ok(code) => code.to_string(),
-            Err(()) => "Something went wrong".to_string(),
+        let desc = match (status, &conn.conn_type) {
+            (Ok(code), ConnectionType::Remote { .. }) => code.to_string(),
+            (Ok(ms), ConnectionType::Local { .. }) => format!("{ms} ms"),
+            (Err(()), _) => "Something went wrong".to_string(),
         };
 
         let color = status_to_color(*status, &conn.conn_type);

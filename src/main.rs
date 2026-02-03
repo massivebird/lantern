@@ -137,11 +137,16 @@ fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
         }
         ConnectionType::Local { ip } => {
             match ping::new(ip).timeout(Duration::from_secs(1)).send() {
-                Ok(ping_res) => Ok(ping_res.ident),
+                Ok(ping_res) => Ok(ping_res.rtt.subsec_millis() as u16),
                 Err(_) => Err(()),
             }
         }
     };
 
-    conns.lock().unwrap().get_mut(idx).unwrap().push_status(code);
+    conns
+        .lock()
+        .unwrap()
+        .get_mut(idx)
+        .unwrap()
+        .push_status(code);
 }
