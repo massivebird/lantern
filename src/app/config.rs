@@ -11,13 +11,28 @@ pub fn read_config() -> Vec<Connection> {
     let home = std::env::var("HOME").unwrap();
 
     // Full path to the toml config file.
-    let toml_path = PathBuf::from(format!("{home}/.config/lantern/config.toml"));
+    let toml_path = PathBuf::from(home)
+        .join(".config")
+        .join("lantern")
+        .join("config.toml");
 
-    let mut f = std::fs::File::open(&toml_path).unwrap();
+    let Ok(mut f) = std::fs::File::open(&toml_path) else {
+        eprintln!(
+            "ERROR: failed to read configuration file: {}",
+            toml_path.display()
+        );
+        std::process::exit(1);
+    };
 
     let mut buf = String::new();
-    f.read_to_string(&mut buf)
-        .expect("Failed to read contents of TOML config file.");
+
+    if f.read_to_string(&mut buf).is_err() {
+        eprintln!(
+            "ERROR: failed to read configuration file: {}",
+            toml_path.display()
+        );
+        std::process::exit(1);
+    }
 
     let c: ConfigFile = toml::from_str(&buf).unwrap();
 
