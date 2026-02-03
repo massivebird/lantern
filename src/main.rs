@@ -63,7 +63,7 @@ fn start_app<B: Backend>(
     app: &mut App,
 ) -> io::Result<()> {
     let conns = Arc::clone(&app.connections);
-    let upd = app.updated.clone();
+    let clk = app.clk.clone();
 
     thread::spawn(move || {
         loop {
@@ -77,7 +77,7 @@ fn start_app<B: Backend>(
                 });
             }
 
-            *upd.lock().unwrap() ^= true;
+            *clk.lock().unwrap() ^= true;
 
             thread::sleep(Duration::from_secs(5));
         }

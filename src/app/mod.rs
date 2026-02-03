@@ -24,7 +24,7 @@ pub struct App {
 
     /// Alternates with every wave of connection tests.
     /// Used for displaying update progress.
-    pub updated: Arc<Mutex<bool>>,
+    pub clk: Arc<Mutex<bool>>,
 
     /// Indicates if the user has begun quitting the app.
     is_closing: bool,

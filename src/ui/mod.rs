@@ -20,16 +20,16 @@ pub fn ui(f: &mut Frame, app: &App) {
         SelectedTab::Log => tab::render_tab_log(f, app),
     }
 
-    let upd_str = if *app.updated.lock().unwrap() {
+    let clk_str = if *app.clk.lock().unwrap() {
         "██  "
     } else {
         "  ██"
     };
 
-    let upd_block = Block::bordered();
+    let clk_block = Block::bordered();
 
     f.render_widget(
-        widgets::Paragraph::new(upd_str).block(upd_block),
+        widgets::Paragraph::new(clk_str).block(clk_block),
         Rect::new(f.area().width - 6, f.area().height - 3, 6, 3),
     );
 }
