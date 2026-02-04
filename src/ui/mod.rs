@@ -13,7 +13,7 @@ pub fn ui(f: &mut Frame, app: &App) {
 
     let tabs = Tabs::new(titles).select(app.selected_tab as usize);
 
-    f.render_widget(tabs, Rect::new(0, 0, f.area().width, f.area().height));
+    f.render_widget(tabs, Rect::new(7, 0, f.area().width, f.area().height));
 
     match app.selected_tab {
         SelectedTab::Live => tab::render_tab_live(f, app),
@@ -21,15 +21,13 @@ pub fn ui(f: &mut Frame, app: &App) {
     }
 
     let clk_str = if *app.clk.lock().unwrap() {
-        "██  "
+        "██   ║"
     } else {
-        "  ██"
+        "  ██ ║"
     };
 
-    let clk_block = Block::bordered();
-
     f.render_widget(
-        widgets::Paragraph::new(clk_str).block(clk_block),
-        Rect::new(f.area().width - 6, f.area().height - 3, 6, 3),
+        widgets::Paragraph::new(clk_str),
+        Rect::new(1, 0, 6, 3),
     );
 }
