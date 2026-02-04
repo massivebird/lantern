@@ -79,7 +79,7 @@ fn start_app<B: Backend>(
 
             *clk.lock().unwrap() ^= true;
 
-            thread::sleep(Duration::from_secs(5));
+            thread::sleep(Duration::from_secs(8));
         }
     });
 
