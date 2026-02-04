@@ -1,3 +1,6 @@
+use super::ConnectionType;
+use ratatui::style::Color;
+
 type Code = Result<u16, String>;
 type Timestamp = chrono::DateTime<chrono::Local>;
 
@@ -21,6 +24,22 @@ impl Status {
 
     pub const fn timestamp(&self) -> Timestamp {
         self.time
+    }
+
+    pub const fn generate_color(&self, conn_type: &ConnectionType) -> Color {
+        let Ok(code) = self.code() else {
+            return Color::Red;
+        };
+
+        match conn_type {
+            ConnectionType::Remote { .. } => match code {
+                200 => Color::Green,
+                400.. => Color::Red,
+                _ => Color::Yellow,
+            },
+
+            ConnectionType::Local { .. } => Color::Green,
+        }
     }
 }
 

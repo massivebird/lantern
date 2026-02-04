@@ -1,4 +1,4 @@
-use crate::app::{self, App, connection::ConnectionType, output_fmt::OutputFmt};
+use crate::app::{App, connection::ConnectionType, output_fmt::OutputFmt};
 use ratatui::{
     Frame,
     layout::Rect,
@@ -14,7 +14,7 @@ pub fn render_tab_live(f: &mut Frame, app: &App) {
         let color = conn
             .log()
             .front()
-            .map_or(Color::Gray, |f| status_to_color(f, &conn.conn_type));
+            .map_or(Color::Gray, |sts| sts.generate_color(&conn.conn_type));
 
         let url = conn.addr();
 
@@ -62,7 +62,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
             (Err(e), _) => e.clone(),
         };
 
-        let color = status_to_color(status, &conn.conn_type);
+        let color = status.generate_color(&conn.conn_type);
 
         let time = status.timestamp();
         let now = chrono::Local::now();
@@ -97,19 +97,4 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     );
 
     f.render_widget(info, Rect::new(2, 1, f.area().width, f.area().height - 1));
-}
-
-const fn status_to_color(status: &app::Status, conn_type: &ConnectionType) -> Color {
-    let Ok(code) = status.code() else {
-        return Color::Red;
-    };
-
-    match conn_type {
-        ConnectionType::Remote { .. } => match code {
-            200 => Color::Green,
-            400.. => Color::Red,
-            _ => Color::Yellow,
-        },
-        ConnectionType::Local { .. } => Color::Green,
-    }
 }
