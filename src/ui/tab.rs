@@ -55,7 +55,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
 
     let mut text = Vec::new();
 
-    for (i, status) in conn.log().iter().enumerate() {
+    for status in conn.log() {
         let desc = match (status.code(), &conn.conn_type) {
             (Ok(code), ConnectionType::Remote { .. }) => code.to_string(),
             (Ok(ms), ConnectionType::Local { .. }) => format!("{ms} ms"),
@@ -64,14 +64,15 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
 
         let color = status_to_color(status, &conn.conn_type);
 
+        let time = status.timestamp();
+        let now = chrono::Local::now();
+
         // Identify the latest status.
-        let left = if i == 0 {
-            Span::styled("  Now  ", Style::new().bg(color).fg(Color::Black).bold())
+        let left = if now.signed_duration_since(time).num_milliseconds() < 75 {
+            Span::styled("░░░░░░░", Style::new().bg(color).fg(Color::Black).bold())
         } else {
             Span::styled("       ", Style::new().bg(color))
         };
-
-        let time = status.timestamp().time();
 
         text.push(Line::from(vec![
             left,
@@ -98,7 +99,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     f.render_widget(info, Rect::new(2, 1, f.area().width, f.area().height - 1));
 }
 
-fn status_to_color(status: &app::Status, conn_type: &ConnectionType) -> Color {
+const fn status_to_color(status: &app::Status, conn_type: &ConnectionType) -> Color {
     let Ok(code) = status.code() else {
         return Color::Red;
     };
