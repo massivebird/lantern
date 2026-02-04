@@ -86,7 +86,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     let paragraph = Paragraph::new(text).block(block);
 
     let info = Line::from(format!(
-        " Selected connection: [{idx:02}] {} ({}) ",
+        " [{idx:02}] {} ({}) ",
         conn.name,
         conn.addr()
     ));
