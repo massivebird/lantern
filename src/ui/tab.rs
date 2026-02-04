@@ -48,53 +48,88 @@ pub fn render_tab_live(f: &mut Frame, app: &App) {
 }
 
 pub fn render_tab_log(f: &mut Frame, app: &App) {
-    let (idx, conn) = app.log_conn();
+    let (i, log_conn) = app.log_conn();
 
-    let block =
-        Block::bordered().title_bottom(" q: Quit | j: Next connection | k: Previous connection ");
+    let sidebar_width = 8;
 
-    let mut text = Vec::new();
+    // Populate sidebar with conn summaries.
+    let sidebar_txt: Vec<Line> = app
+        .connections
+        .lock()
+        .unwrap()
+        .iter()
+        .enumerate()
+        .map(|(j, conn)| {
+            let color = conn
+                .log()
+                .front()
+                .map_or_else(|| Color::Gray, |s| s.generate_color(&conn.conn_type));
 
-    for status in conn.log() {
-        let desc = match (status.code(), &conn.conn_type) {
-            (Ok(code), ConnectionType::Remote { .. }) => code.to_string(),
-            (Ok(ms), ConnectionType::Local { .. }) => format!("{ms} ms"),
-            (Err(e), _) => e.clone(),
-        };
+            let indicator = if j == i { "> " } else { "  " };
 
-        let color = status.generate_color(&conn.conn_type);
-
-        let time = status.timestamp();
-        let now = chrono::Local::now();
-
-        // Identify the latest status.
-        let left = if now.signed_duration_since(time).num_milliseconds() < 75 {
-            Span::styled("░░░░░░░", Style::new().bg(color).fg(Color::Black).bold())
-        } else {
-            Span::styled("       ", Style::new().bg(color))
-        };
-
-        text.push(Line::from(vec![
-            left,
-            Span::raw(" "),
-            Span::raw(format!("{desc:9}")),
-            Span::raw(" "),
-            Span::raw(time.to_string()),
-        ]));
-    }
-
-    let paragraph = Paragraph::new(text).block(block);
-
-    let info = Line::from(format!(
-        " [{idx:02}] {} ({}) ",
-        conn.name,
-        conn.addr()
-    ));
+            Line::from(vec![
+                Span::from(indicator),
+                Span::from(format!("[{j:02}]")).style(Style::new().bg(color).fg(Color::Black)),
+            ])
+        })
+        .collect();
 
     f.render_widget(
-        paragraph,
-        Rect::new(0, 1, f.area().width, f.area().height - 1),
+        Paragraph::new(sidebar_txt).block(Block::bordered()),
+        Rect::new(0, 1, sidebar_width, f.area().height - 1),
     );
 
-    f.render_widget(info, Rect::new(2, 1, f.area().width, f.area().height - 1));
+    // String-ify the selected connection's status log.
+    let log_txt: Vec<Line> = log_conn
+        .log()
+        .iter()
+        .map(|status| {
+            let desc = match (status.code(), &log_conn.conn_type) {
+                (Ok(code), ConnectionType::Remote { .. }) => code.to_string(),
+                (Ok(ms), ConnectionType::Local { .. }) => format!("{ms} ms"),
+                (Err(e), _) => e.clone(),
+            };
+
+            let color = status.generate_color(&log_conn.conn_type);
+
+            let time = status.timestamp();
+            let now = chrono::Local::now();
+
+            // Make the latest status distinct.
+            let color_pop = if now.signed_duration_since(time).num_milliseconds() < 75 {
+                Span::styled("░░░░░░░", Style::new().bg(color).fg(Color::Black).bold())
+            } else {
+                Span::styled("       ", Style::new().bg(color))
+            };
+
+            Line::from(vec![
+                color_pop,
+                Span::raw(" "),
+                Span::raw(format!("{desc:9}")),
+                Span::raw(" "),
+                Span::raw(time.to_string()),
+            ])
+        })
+        .collect();
+
+    f.render_widget(
+        Paragraph::new(log_txt).block(Block::bordered()),
+        Rect::new(sidebar_width, 1, f.area().width, f.area().height - 1),
+    );
+
+    // Display info on selected conn.
+    f.render_widget(
+        Line::from(format!(
+            " [{i:02}] {} ({}) ",
+            log_conn.name,
+            log_conn.addr()
+        )),
+        Rect::new(sidebar_width + 1, 1, f.area().width, f.area().height - 1),
+    );
+
+    // Render some controls instructions.
+    f.render_widget(
+        Line::from(" q: Quit | j: Next connection | k: Previous connection "),
+        Rect::new(1, f.area().height - 1, f.area().width, f.area().height - 1),
+    );
 }
