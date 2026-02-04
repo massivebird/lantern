@@ -107,6 +107,7 @@ const fn status_to_color(status: &app::Status, conn_type: &ConnectionType) -> Co
     match conn_type {
         ConnectionType::Remote { .. } => match code {
             200 => Color::Green,
+            400.. => Color::Red,
             _ => Color::Yellow,
         },
         ConnectionType::Local { .. } => Color::Green,
