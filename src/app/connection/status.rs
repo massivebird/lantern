@@ -1,4 +1,4 @@
-use super::ConnectionType;
+use super::Address;
 use ratatui::style::Color;
 
 type Code = Result<u16, String>;
@@ -26,19 +26,19 @@ impl Status {
         self.time
     }
 
-    pub const fn generate_color(&self, conn_type: &ConnectionType) -> Color {
+    pub const fn generate_color(&self, addr: &Address) -> Color {
         let Ok(code) = self.code() else {
             return Color::Red;
         };
 
-        match conn_type {
-            ConnectionType::Remote { .. } => match code {
+        match addr {
+            Address::Remote { .. } => match code {
                 200 => Color::Green,
                 400.. => Color::Red,
                 _ => Color::Yellow,
             },
 
-            ConnectionType::Local { .. } => Color::Green,
+            Address::Local { .. } => Color::Green,
         }
     }
 }

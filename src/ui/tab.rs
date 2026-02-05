@@ -1,4 +1,4 @@
-use crate::app::{App, connection::ConnectionType, output_fmt::OutputFmt};
+use crate::app::{App, connection::Address, output_fmt::OutputFmt};
 use ratatui::{
     Frame,
     layout::Rect,
@@ -14,7 +14,7 @@ pub fn render_tab_live(f: &mut Frame, app: &App) {
         let color = conn
             .log()
             .front()
-            .map_or(Color::Gray, |sts| sts.generate_color(&conn.conn_type));
+            .map_or(Color::Gray, |sts| sts.generate_color(&conn.addr));
 
         let url = conn.addr();
 
@@ -63,7 +63,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
             let color = conn
                 .log()
                 .front()
-                .map_or_else(|| Color::Gray, |s| s.generate_color(&conn.conn_type));
+                .map_or_else(|| Color::Gray, |s| s.generate_color(&conn.addr));
 
             let indicator = if j == i { "> " } else { "  " };
 
@@ -84,13 +84,13 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
         .log()
         .iter()
         .map(|status| {
-            let desc = match (status.code(), &log_conn.conn_type) {
-                (Ok(code), ConnectionType::Remote { .. }) => code.to_string(),
-                (Ok(ms), ConnectionType::Local { .. }) => format!("{ms} ms"),
+            let desc = match (status.code(), &log_conn.addr) {
+                (Ok(code), Address::Remote { .. }) => code.to_string(),
+                (Ok(ms), Address::Local { .. }) => format!("{ms} ms"),
                 (Err(e), _) => e.clone(),
             };
 
-            let color = status.generate_color(&log_conn.conn_type);
+            let color = status.generate_color(&log_conn.addr);
 
             let time = status.timestamp();
             let now = chrono::Local::now();

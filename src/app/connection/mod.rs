@@ -1,10 +1,10 @@
 use serde::{Deserialize, Deserializer};
 use std::{borrow::Cow, collections::VecDeque};
 
-mod conn_type;
+mod address;
 mod status;
 
-pub use conn_type::ConnectionType;
+pub use address::Address;
 pub use status::Status;
 
 pub const MAX_STATUSES: usize = 30;
@@ -15,7 +15,7 @@ pub struct Connection {
 
     #[serde(rename = "addr")]
     #[serde(deserialize_with = "deserialize_conn")]
-    pub conn_type: ConnectionType,
+    pub addr: Address,
 
     #[serde(skip)]
     log: VecDeque<Status>,
@@ -36,23 +36,23 @@ impl Connection {
 
     /// Returns the effective address.
     pub fn addr(&self) -> Cow<'_, str> {
-        match &self.conn_type {
-            ConnectionType::Remote { url } => Cow::Borrowed(url),
-            ConnectionType::Local { ip } => Cow::Owned(ip.to_string()),
+        match &self.addr {
+            Address::Remote { url } => Cow::Borrowed(url),
+            Address::Local { ip } => Cow::Owned(ip.to_string()),
         }
     }
 }
 
-fn deserialize_conn<'de, D>(deserializer: D) -> Result<ConnectionType, D::Error>
+fn deserialize_conn<'de, D>(deserializer: D) -> Result<Address, D::Error>
 where
     D: Deserializer<'de>,
 {
     let buf = Cow::<'de, str>::deserialize(deserializer)?;
 
     Ok(buf.parse().map_or_else(
-        |_| ConnectionType::Remote {
+        |_| Address::Remote {
             url: buf.to_string(),
         },
-        |ip| ConnectionType::Local { ip },
+        |ip| Address::Local { ip },
     ))
 }

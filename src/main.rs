@@ -1,7 +1,7 @@
 use self::{
     app::{
         App,
-        connection::{Connection, ConnectionType},
+        connection::{Address, Connection},
         selected_tab::SelectedTab,
     },
     ui::ui,
@@ -126,10 +126,10 @@ fn handle_events(app: &mut App) -> io::Result<()> {
 }
 
 fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
-    let conn_type = conns.lock().unwrap().get(idx).unwrap().conn_type.clone();
+    let addr = conns.lock().unwrap().get(idx).unwrap().addr.clone();
 
-    let code: app::Status = match conn_type {
-        ConnectionType::Remote { url } => {
+    let code: app::Status = match addr {
+        Address::Remote { url } => {
             let client = reqwest::blocking::Client::new()
                 .get(url)
                 .timeout(Duration::from_secs(3));
@@ -139,12 +139,10 @@ fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
                 Err(e) => Err(e.to_string()).into(),
             }
         }
-        ConnectionType::Local { ip } => {
-            match ping::new(ip).timeout(Duration::from_secs(1)).send() {
-                Ok(ping_res) => Ok(ping_res.rtt.subsec_millis().try_into().unwrap()).into(),
-                Err(e) => Err(e.to_string()).into(),
-            }
-        }
+        Address::Local { ip } => match ping::new(ip).timeout(Duration::from_secs(1)).send() {
+            Ok(ping_res) => Ok(ping_res.rtt.subsec_millis().try_into().unwrap()).into(),
+            Err(e) => Err(e.to_string()).into(),
+        },
     };
 
     conns
