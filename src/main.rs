@@ -1,6 +1,6 @@
 use self::{
     app::{
-        App,
+        App, Status,
         connection::{Address, Connection},
         selected_tab::SelectedTab,
     },
@@ -173,15 +173,17 @@ fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
 
                     let val = json.to_string();
 
-                    if val == alert {
-                        Ok(400).into()
+                    let code = if val == alert {
+                        400
                     } else if val == warn {
-                        Ok(300).into()
+                        300
                     } else if val == ok {
-                        Ok(200).into()
+                        200
                     } else {
-                        Ok(100).into()
-                    }
+                        100
+                    };
+
+                    Status::new(Ok(code)).set_msg(val)
                 }
                 Err(e) => Err(e.to_string()).into(),
             }

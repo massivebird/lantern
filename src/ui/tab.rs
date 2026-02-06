@@ -85,7 +85,8 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
         .iter()
         .map(|status| {
             let desc = match (status.code(), &log_conn.addr) {
-                (Ok(code), Address::Remote { .. } | Address::Json { .. }) => code.to_string(),
+                (Ok(code), Address::Remote { .. } ) => code.to_string(),
+                (Ok(_),  Address::Json { .. }) => status.msg().unwrap(),
                 (Ok(ms), Address::Local { .. }) => format!("{ms} ms"),
                 (Err(e), _) => e.clone(),
             };
@@ -105,7 +106,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
             Line::from(vec![
                 color_pop,
                 Span::raw(" "),
-                Span::raw(format!("{desc:9}")),
+                Span::raw(format!("{desc:16}")),
                 Span::raw(" "),
                 Span::raw(time.to_string()),
             ])

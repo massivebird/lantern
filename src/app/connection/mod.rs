@@ -8,6 +8,8 @@ mod status;
 pub use address::Address;
 pub use status::Status;
 
+use self::json::JsonConn;
+
 pub const MAX_STATUSES: usize = 30;
 
 #[derive(Clone, Debug, Deserialize)]
@@ -56,4 +58,22 @@ where
         },
         |ip| Address::Local { ip },
     ))
+}
+
+impl From<JsonConn> for Connection {
+    fn from(value: JsonConn) -> Self {
+        let addr = Address::Json {
+            url: value.addr,
+            field: value.field,
+            ok: value.ok,
+            warn: value.warn,
+            alert: value.alert,
+        };
+
+        Self {
+            name: value.name,
+            addr,
+            log: VecDeque::new(),
+        }
+    }
 }

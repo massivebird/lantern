@@ -1,7 +1,5 @@
-use super::connection::Connection;
-use super::connection::json::JsonConn;
+use super::connection::{Connection, json::JsonConn};
 use serde::Deserialize;
-use std::collections::VecDeque;
 use std::{io::Read, path::PathBuf};
 
 #[derive(Clone, Debug, Deserialize)]
@@ -41,10 +39,7 @@ pub fn read_config() -> Vec<Connection> {
 
     [
         c.connection,
-        c.json
-            .into_iter()
-            .map(|j| Connection::from(j.into()))
-            .collect(),
+        c.json.into_iter().map(std::convert::Into::into).collect(),
     ]
     .concat()
 }

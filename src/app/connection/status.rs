@@ -7,6 +7,7 @@ type Timestamp = chrono::DateTime<chrono::Local>;
 #[derive(Clone, Debug)]
 pub struct Status {
     code: Code,
+    msg: Option<String>,
     time: Timestamp,
 }
 
@@ -15,7 +16,20 @@ impl Status {
         Self {
             code,
             time: chrono::Local::now(),
+            msg: None,
         }
+    }
+
+    pub fn set_msg(self, msg: String) -> Self {
+        Self {
+            msg: Some(msg),
+            code: self.code,
+            time: self.time,
+        }
+    }
+
+    pub fn msg(&self) -> Option<String> {
+        self.msg.clone()
     }
 
     pub const fn code(&self) -> &Code {
