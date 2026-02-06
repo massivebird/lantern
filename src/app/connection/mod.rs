@@ -1,3 +1,4 @@
+use self::json::JsonConn;
 use serde::{Deserialize, Deserializer};
 use std::{borrow::Cow, collections::VecDeque};
 
@@ -7,8 +8,6 @@ mod status;
 
 pub use address::Address;
 pub use status::Status;
-
-use self::json::JsonConn;
 
 pub const MAX_STATUSES: usize = 40;
 
@@ -30,13 +29,27 @@ impl Connection {
             self.log.pop_back();
         }
 
-        let status = status.id(self.log.front().map(|st| st.id.wrapping_add(1)).unwrap_or_default());
+        let status = status.id(self
+            .log
+            .front()
+            .map(|st| st.id.wrapping_add(1))
+            .unwrap_or_default());
 
         self.log.push_front(status);
     }
 
     pub const fn log(&self) -> &VecDeque<Status> {
         &self.log
+    }
+
+    pub fn pretty_name(&self) -> String {
+        let symbol = match &self.addr {
+            Address::Remote { .. } => '󰖟',
+            Address::Local { .. } => '󰇅',
+            Address::Json { .. } => '󱂛',
+        };
+
+        format!("{symbol} {}", self.name)
     }
 
     /// Returns the effective address.

@@ -21,19 +21,20 @@ pub fn render_tab_live(f: &mut Frame, app: &App) {
         let conn_output: Line<'_> = match app.output_fmt {
             OutputFmt::Bullet => Line::from(vec![
                 Span::from(" 󰝤 ").style(color),
-                Span::from(format!("{} ({})", conn.name, url)),
+                Span::from(format!("{} ({})", conn.pretty_name(), url)),
             ]),
-            OutputFmt::Line => Line::from(Span::from(format!(" {} ({})", conn.name, url))).style(
-                Style::new()
-                    .bg(color)
-                    .fg(if color == Color::DarkGray {
-                        Color::DarkGray
-                    } else {
-                        Color::Black
-                    })
-                    .add_modifier(Modifier::BOLD)
-                    .add_modifier(Modifier::ITALIC),
-            ),
+            OutputFmt::Line => Line::from(Span::from(format!(" {} ({})", conn.pretty_name(), url)))
+                .style(
+                    Style::new()
+                        .bg(color)
+                        .fg(if color == Color::DarkGray {
+                            Color::DarkGray
+                        } else {
+                            Color::Black
+                        })
+                        .add_modifier(Modifier::BOLD)
+                        .add_modifier(Modifier::ITALIC),
+                ),
         };
 
         list_items.push(conn_output);
@@ -140,7 +141,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     f.render_widget(
         Line::from(format!(
             " [{i:02}] {} ({}) ",
-            log_conn.name,
+            log_conn.pretty_name(),
             log_conn.addr()
         )),
         Rect::new(sidebar_width + 1, 1, f.area().width, f.area().height - 1),
