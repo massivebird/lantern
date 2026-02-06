@@ -37,7 +37,6 @@ fn main() -> io::Result<()> {
 
     // Create app and run it.
     let ui_refresh_rate = Duration::from_millis(200);
-
     let res = start_app(&mut terminal, ui_refresh_rate, &mut app);
 
     // App is quitting!
@@ -79,7 +78,7 @@ fn start_app<B: Backend>(
 
             *clk.lock().unwrap() ^= true;
 
-            thread::sleep(Duration::from_secs(8));
+            thread::sleep(Duration::from_secs(10));
         }
     });
 
