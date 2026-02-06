@@ -1,10 +1,13 @@
 use super::connection::Connection;
+use super::connection::json::JsonConn;
 use serde::Deserialize;
+use std::collections::VecDeque;
 use std::{io::Read, path::PathBuf};
 
 #[derive(Clone, Debug, Deserialize)]
 struct ConfigFile {
     connection: Vec<Connection>,
+    json: Vec<JsonConn>,
 }
 
 pub fn read_config() -> Vec<Connection> {
@@ -36,5 +39,12 @@ pub fn read_config() -> Vec<Connection> {
 
     let c: ConfigFile = toml::from_str(&buf).unwrap();
 
-    c.connection
+    [
+        c.connection,
+        c.json
+            .into_iter()
+            .map(|j| Connection::from(j.into()))
+            .collect(),
+    ]
+    .concat()
 }

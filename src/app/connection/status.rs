@@ -32,7 +32,7 @@ impl Status {
         };
 
         match addr {
-            Address::Remote { .. } => match code {
+            Address::Remote { .. } | Address::Json { .. } => match code {
                 200 => Color::Green,
                 400.. => Color::Red,
                 _ => Color::Yellow,

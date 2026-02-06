@@ -85,7 +85,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
         .iter()
         .map(|status| {
             let desc = match (status.code(), &log_conn.addr) {
-                (Ok(code), Address::Remote { .. }) => code.to_string(),
+                (Ok(code), Address::Remote { .. } | Address::Json { .. }) => code.to_string(),
                 (Ok(ms), Address::Local { .. }) => format!("{ms} ms"),
                 (Err(e), _) => e.clone(),
             };

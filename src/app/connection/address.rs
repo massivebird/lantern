@@ -2,8 +2,20 @@ use serde::Deserialize;
 
 #[derive(Clone, Debug, Deserialize)]
 pub enum Address {
-    Remote { url: String },
-    Local { ip: std::net::IpAddr },
+    Remote {
+        url: String,
+    },
+    Local {
+        ip: std::net::IpAddr,
+    },
+    Json {
+        url: String,
+        field: String,
+
+        ok: String,
+        warn: String,
+        alert: String,
+    },
 }
 
 impl Default for Address {

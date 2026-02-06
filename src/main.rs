@@ -139,10 +139,53 @@ fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
                 Err(e) => Err(e.to_string()).into(),
             }
         }
+
         Address::Local { ip } => match ping::new(ip).timeout(Duration::from_secs(1)).send() {
             Ok(ping_res) => Ok(ping_res.rtt.subsec_millis().try_into().unwrap()).into(),
             Err(e) => Err(e.to_string()).into(),
         },
+
+        Address::Json {
+            url,
+            field,
+            ok,
+            warn,
+            alert,
+        } => {
+            let client = reqwest::blocking::Client::new()
+                .get(url)
+                .timeout(Duration::from_secs(3));
+
+            match client.send() {
+                Ok(json) => {
+                    let mut json = json::parse(&json.text().unwrap()).unwrap();
+
+                    // Parse `field` into its keys
+                    for u in field.split(&['.', '[']) {
+                        if let Some(i) = u.find(']') {
+                            // Numeric indexing from an array
+                            json = json[u[..i].parse::<usize>().unwrap()].clone();
+                        } else {
+                            // String
+                            json = json[u].clone();
+                        }
+                    }
+
+                    let val = json.to_string();
+
+                    if val == alert {
+                        Ok(400).into()
+                    } else if val == warn {
+                        Ok(300).into()
+                    } else if val == ok {
+                        Ok(200).into()
+                    } else {
+                        Ok(100).into()
+                    }
+                }
+                Err(e) => Err(e.to_string()).into(),
+            }
+        }
     };
 
     conns

@@ -2,6 +2,7 @@ use serde::{Deserialize, Deserializer};
 use std::{borrow::Cow, collections::VecDeque};
 
 mod address;
+pub mod json;
 mod status;
 
 pub use address::Address;
@@ -37,7 +38,7 @@ impl Connection {
     /// Returns the effective address.
     pub fn addr(&self) -> Cow<'_, str> {
         match &self.addr {
-            Address::Remote { url } => Cow::Borrowed(url),
+            Address::Remote { url } | Address::Json { url, .. } => Cow::Borrowed(url),
             Address::Local { ip } => Cow::Owned(ip.to_string()),
         }
     }
