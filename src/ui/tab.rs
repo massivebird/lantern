@@ -83,10 +83,11 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     let log_txt: Vec<Line> = log_conn
         .log()
         .iter()
-        .map(|status| {
+        .enumerate()
+        .map(|(j, status)| {
             let desc = match (status.code(), &log_conn.addr) {
-                (Ok(code), Address::Remote { .. } ) => code.to_string(),
-                (Ok(_),  Address::Json { .. }) => status.msg().unwrap(),
+                (Ok(code), Address::Remote { .. }) => code.to_string(),
+                (Ok(_), Address::Json { .. }) => status.msg().unwrap(),
                 (Ok(ms), Address::Local { .. }) => format!("{ms} ms"),
                 (Err(e), _) => e.clone(),
             };
@@ -94,20 +95,32 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
             let color = status.generate_color(&log_conn.addr);
 
             let time = status.timestamp();
-            let now = chrono::Local::now();
 
             // Make the latest status distinct.
-            let color_pop = if now.signed_duration_since(time).num_milliseconds() < 75 {
+            let color_pop = if chrono::Local::now()
+                .signed_duration_since(time)
+                .num_milliseconds()
+                < 75
+            {
                 Span::styled("░░░░░░░", Style::new().bg(color).fg(Color::Black).bold())
             } else {
                 Span::styled("       ", Style::new().bg(color))
             };
 
+            let guide = {
+                let min_desc_len: usize = 16;
+
+                let mid = if j > 0 && j.saturating_add(1) % 3 == 0 { "." } else { " " }
+                    .repeat(min_desc_len.saturating_sub(desc.len()));
+
+                format!(" {mid} ")
+            };
+
             Line::from(vec![
                 color_pop,
                 Span::raw(" "),
-                Span::raw(format!("{desc:16}")),
-                Span::raw(" "),
+                Span::raw(desc),
+                Span::from(guide).fg(Color::Gray),
                 Span::raw(time.to_string()),
             ])
         })
