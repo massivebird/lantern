@@ -24,7 +24,7 @@ pub fn ui(f: &mut Frame, app: &App) {
     f.render_widget(widgets::Paragraph::new(clk_str), Rect::new(1, 0, 6, 3));
 
     match app.selected_tab {
-        SelectedTab::Live => tab::render_tab_live(f, app),
+        SelectedTab::Summary => tab::render_tab_live(f, app),
         SelectedTab::Log => tab::render_tab_log(f, app),
     }
 }

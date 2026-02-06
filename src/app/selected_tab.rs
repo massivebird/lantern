@@ -4,7 +4,7 @@ use strum::{Display, EnumIter, FromRepr};
 #[derive(Default, Copy, Clone, Display, FromRepr, EnumIter, PartialEq, Eq)]
 pub enum SelectedTab {
     #[default]
-    Live,
+    Summary,
     Log,
 }
 

@@ -110,7 +110,7 @@ fn handle_events(app: &mut App) -> io::Result<()> {
             KeyCode::Char('q' | 'Q') => app.close(),
             KeyCode::Char('l') => app.next_tab(),
             KeyCode::Char('h') => app.prev_tab(),
-            KeyCode::Char('o') if app.selected_tab == SelectedTab::Live => app.cycle_output_fmt(),
+            KeyCode::Char('o') if app.selected_tab == SelectedTab::Summary => app.cycle_output_fmt(),
             KeyCode::Char('j') if app.selected_tab == SelectedTab::Log => {
                 app.next_log_conn();
             }
