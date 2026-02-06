@@ -160,13 +160,13 @@ fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
                 Ok(json) => {
                     let mut json = json::parse(&json.text().unwrap()).unwrap();
 
-                    // Parse `field` into its keys
+                    // Parse individual json keys
                     for u in field.split(&['.', '[']) {
                         if let Some(i) = u.find(']') {
                             // Numeric indexing from an array
                             json = json[u[..i].parse::<usize>().unwrap()].clone();
                         } else {
-                            // String
+                            // String key
                             json = json[u].clone();
                         }
                     }
