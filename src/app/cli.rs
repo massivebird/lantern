@@ -1,9 +1,9 @@
 use crate::app::OutputFmt;
-use clap::{builder::EnumValueParser, Arg, ArgMatches, ValueEnum, ValueHint};
+use clap::{Arg, ArgMatches, ValueEnum, ValueHint, builder::EnumValueParser};
 
 pub(super) fn generate_matches() -> ArgMatches {
     clap::command!()
-        .arg(
+        .args([
             Arg::new("output_fmt")
                 .long("output-fmt")
                 .short('o')
@@ -18,6 +18,11 @@ pub(super) fn generate_matches() -> ArgMatches {
                 .value_name("format")
                 .value_hint(ValueHint::Other)
                 .required(false),
-        )
+            Arg::new("interval")
+                .long("interval")
+                .short('i')
+                .value_parser(clap::value_parser!(u32))
+                .help("Time between requests in seconds.")
+        ])
         .get_matches()
 }

@@ -28,6 +28,9 @@ pub struct App {
 
     /// Indicates if the user has begun quitting the app.
     is_closing: bool,
+
+    /// Clock interval between requests.
+    pub interval: u32,
 }
 
 impl App {
@@ -41,9 +44,12 @@ impl App {
             None => OutputFmt::default(),
         };
 
+        let interval = matches.get_one::<u32>("interval").unwrap_or(&15);
+
         Self {
             connections: Arc::new(Mutex::new(conns)),
             output_fmt,
+            interval: *interval,
             ..Default::default()
         }
     }
