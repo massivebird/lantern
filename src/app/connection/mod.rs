@@ -10,7 +10,7 @@ pub use status::Status;
 
 use self::json::JsonConn;
 
-pub const MAX_STATUSES: usize = 30;
+pub const MAX_STATUSES: usize = 40;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Connection {
