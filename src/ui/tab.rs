@@ -70,7 +70,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
 
             Line::from(vec![
                 Span::from(indicator),
-                Span::from(format!("[{j:02}]")).style(Style::new().bg(color).fg(Color::Black)),
+                Span::from(format!("[{j:02}]")).style(Style::new().bg(color).fg(Color::Black).bold()),
             ])
         })
         .collect();
