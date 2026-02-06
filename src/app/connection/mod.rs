@@ -25,12 +25,14 @@ pub struct Connection {
 }
 
 impl Connection {
-    pub fn push_status(&mut self, code: Status) {
+    pub fn push_status(&mut self, status: Status) {
         if self.log.len() == MAX_STATUSES {
             self.log.pop_back();
         }
 
-        self.log.push_front(code);
+        let status = status.id(self.log.front().map(|st| st.id.wrapping_add(1)).unwrap_or_default());
+
+        self.log.push_front(status);
     }
 
     pub const fn log(&self) -> &VecDeque<Status> {

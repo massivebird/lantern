@@ -182,7 +182,7 @@ fn test_conn(conns: &Arc<Mutex<Vec<Connection>>>, idx: usize) {
                         100
                     };
 
-                    Status::new(Ok(code)).set_msg(val)
+                    Status::new(Ok(code), 0).set_msg(val)
                 }
                 Err(e) => Err(e.to_string()).into(),
             }

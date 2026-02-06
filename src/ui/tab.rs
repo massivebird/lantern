@@ -83,8 +83,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
     let log_txt: Vec<Line> = log_conn
         .log()
         .iter()
-        .enumerate()
-        .map(|(j, status)| {
+        .map(|status| {
             let desc = match (status.code(), &log_conn.addr) {
                 (Ok(code), Address::Remote { .. }) => code.to_string(),
                 (Ok(_), Address::Json { .. }) => status.msg().unwrap(),
@@ -109,9 +108,15 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
 
             let guide = {
                 let min_desc_len: usize = 16;
+                let interval = 3;
+                let id = status.id;
 
-                let mid = if j > 0 && j.saturating_add(1) % 3 == 0 { "." } else { " " }
-                    .repeat(min_desc_len.saturating_sub(desc.len()));
+                let mid = if id > 0 && id.saturating_add(1) % interval == 0 {
+                    "."
+                } else {
+                    " "
+                }
+                .repeat(min_desc_len.saturating_sub(desc.len()));
 
                 format!(" {mid} ")
             };

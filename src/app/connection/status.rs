@@ -9,14 +9,25 @@ pub struct Status {
     code: Code,
     msg: Option<String>,
     time: Timestamp,
+    pub id: u32,
 }
 
 impl Status {
-    pub fn new(code: Code) -> Self {
+    pub fn new(code: Code, id: u32) -> Self {
         Self {
             code,
             time: chrono::Local::now(),
             msg: None,
+            id,
+        }
+    }
+
+    pub fn id(self, id: u32) -> Self {
+        Self {
+            id,
+            msg: self.msg,
+            code: self.code,
+            time: self.time,
         }
     }
 
@@ -25,6 +36,7 @@ impl Status {
             msg: Some(msg),
             code: self.code,
             time: self.time,
+            id: self.id,
         }
     }
 
@@ -59,6 +71,6 @@ impl Status {
 
 impl From<Code> for Status {
     fn from(value: Code) -> Self {
-        Self::new(value)
+        Self::new(value, 0)
     }
 }
