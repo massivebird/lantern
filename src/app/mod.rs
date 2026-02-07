@@ -34,10 +34,10 @@ pub struct App {
 }
 
 impl App {
-    pub fn generate() -> Self {
+    pub fn generate() -> eyre::Result<Self> {
         let matches: clap::ArgMatches = generate_matches();
 
-        let conns = config::read_config();
+        let conns = config::read_config()?;
 
         let output_fmt = match matches.get_one::<OutputFmt>("output_fmt") {
             Some(&fmt) => fmt,
@@ -46,12 +46,12 @@ impl App {
 
         let interval = matches.get_one::<u32>("interval").unwrap_or(&15);
 
-        Self {
+        Ok(Self {
             connections: Arc::new(Mutex::new(conns)),
             output_fmt,
             interval: *interval,
             ..Default::default()
-        }
+        })
     }
 
     pub fn next_tab(&mut self) {

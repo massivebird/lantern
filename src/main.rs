@@ -25,8 +25,8 @@ use std::{
 mod app;
 mod ui;
 
-fn main() -> io::Result<()> {
-    let mut app = App::generate();
+fn main() -> eyre::Result<()> {
+    let mut app = App::generate()?;
 
     // Set up terminal.
     enable_raw_mode()?;
