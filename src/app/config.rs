@@ -10,7 +10,7 @@ struct ConfigFile {
 }
 
 pub fn read_config() -> eyre::Result<Vec<Connection>> {
-    let home = std::env::var("HOM").wrap_err("Failed to read HOME environment variable")?;
+    let home = std::env::var("HOME").wrap_err("Failed to read HOME environment variable")?;
 
     // Full path to the toml config file.
     let toml_path = PathBuf::from(home)
